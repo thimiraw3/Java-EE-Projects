@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Ledgrr — Invoice Management</title>
+    <link rel="icon" href="assets/icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+    <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-mark">L</div>
+        <div class="brand-text">
+            <span class="brand-name">Ledgrr</span>
+            <span class="brand-tagline">Invoicing</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-page="dashboard">
+            <span class="nav-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/></svg>
+            </span>
+            <span class="nav-label">Overview</span>
+            <span class="nav-pip"></span>
+        </a>
+        <a href="#" class="nav-item" data-page="invoices">
+            <span class="nav-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+            </span>
+            <span class="nav-label">Invoices</span>
+            <span class="nav-pip"></span>
+        </a>
+        <a href="#" class="nav-item" data-page="customers">
+            <span class="nav-icon">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"/></svg>
+            </span>
+            <span class="nav-label">Clients</span>
+            <span class="nav-pip"></span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer">
+        <span class="sidebar-version">v1.0.0</span>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <h1 class="topbar-title" id="page-title">Overview</h1>
+        </div>
+        <div class="topbar-right">
+            <div class="search-pill" id="invoice-search-pill" style="display:none">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                <input type="text" id="global-search" placeholder="Search invoices…"/>
+            </div>
+            <div class="search-pill" id="customer-search-pill" style="display:none">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>
+                <input type="text" id="customer-search" placeholder="Search clients…"/>
+            </div>
+            <button class="cta-btn" id="btn-new-invoice" style="display:none" onclick="openInvoiceModal()">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                New Invoice
+            </button>
+            <button class="cta-btn" id="btn-new-customer" style="display:none" onclick="openCustomerModal()">
+                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                New Client
+            </button>
+        </div>
+    </header>
+
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="page active">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-neutral">📄</div>
+                <div class="kpi-label">Total Invoices</div>
+                <div class="kpi-value mono" id="stat-total">—</div>
+                <div class="kpi-accent kpi-accent-neutral"></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-green">✅</div>
+                <div class="kpi-label">Collected</div>
+                <div class="kpi-value mono" id="stat-paid">—</div>
+                <div class="kpi-accent kpi-accent-green"></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon kpi-icon-red">⚠️</div>
+                <div class="kpi-label">Overdue</div>
+                <div class="kpi-value mono" id="stat-overdue">—</div>
+                <div class="kpi-accent kpi-accent-red"></div>
+            </div>
+            <div class="kpi-card kpi-card-hero">
+                <div class="kpi-icon kpi-icon-hero">💰</div>
+                <div class="kpi-label">Total Revenue</div>
+                <div class="kpi-value mono" id="stat-revenue">—</div>
+            </div>
+        </div>
+
+        <div class="section-row">
+            <h2 class="section-heading">Recent Invoices</h2>
+        </div>
+        <div id="dashboard-invoices" class="data-panel">
+            <div class="shimmer"></div>
+        </div>
+    </section>
+
+    <!-- INVOICES -->
+    <section id="page-invoices" class="page">
+        <div id="invoices-table-container" class="data-panel">
+            <div class="shimmer"></div>
+        </div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section id="page-customers" class="page">
+        <div id="customers-table-container" class="data-panel">
+            <div class="shimmer"></div>
+        </div>
+    </section>
+
+</div>
+
+<div id="toast-container"></div>
+
+<!-- INVOICE MODAL -->
+<div id="invoice-modal" class="modal-veil" style="display:none">
+    <div class="sheet sheet-xl">
+        <div class="sheet-header">
+            <div>
+                <p class="sheet-eyebrow">Ledgrr</p>
+                <h2 class="sheet-title" id="invoice-modal-title">New Invoice</h2>
+            </div>
+            <button class="close-btn" onclick="closeInvoiceModal()">✕</button>
+        </div>
+        <div class="sheet-body">
+            <div id="invoice-form-errors" class="alert-error" style="display:none"></div>
+            <input type="hidden" id="inv-id"/>
+
+            <div class="field-row">
+                <div class="field-wrap grow">
+                    <label class="field-label">Client <span class="req">*</span></label>
+                    <select id="inv-customer" class="field-ctrl"><option value="">— Select client —</option></select>
+                    <span class="field-err" id="err-customer"></span>
+                </div>
+                <div class="field-wrap">
+                    <label class="field-label">Status</label>
+                    <select id="inv-status" class="field-ctrl">
+                        <option value="DRAFT">Draft</option>
+                        <option value="SENT">Sent</option>
+                        <option value="PAID">Paid</option>
+                        <option value="OVERDUE">Overdue</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field-wrap">
+                    <label class="field-label">Issue Date <span class="req">*</span></label>
+                    <input type="text" id="inv-issue-date" class="field-ctrl mono" placeholder="YYYY-MM-DD"/>
+                    <span class="field-err" id="err-issue-date"></span>
+                </div>
+                <div class="field-wrap">
+                    <label class="field-label">Due Date <span class="req">*</span></label>
+                    <input type="text" id="inv-due-date" class="field-ctrl mono" placeholder="YYYY-MM-DD"/>
+                    <span class="field-err" id="err-due-date"></span>
+                </div>
+                <div class="field-wrap">
+                    <label class="field-label">Tax %</label>
+                    <input type="number" id="inv-tax-rate" class="field-ctrl mono" value="0" min="0" max="100" step="0.01"/>
+                </div>
+            </div>
+
+            <div class="items-header-row">
+                <h3 class="items-heading">Line Items</h3>
+                <button type="button" class="ghost-btn sm" onclick="addItemRow()">+ Add row</button>
+            </div>
+            <span class="field-err" id="err-items"></span>
+
+            <div class="items-scroll">
+                <table class="items-tbl">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th class="num-col">Qty</th>
+                            <th class="num-col">Unit Price</th>
+                            <th class="num-col">Total</th>
+                            <th class="act-col"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="totals-strip">
+                <div class="total-row-item"><span>Subtotal</span><span class="mono" id="total-subtotal">$0.00</span></div>
+                <div class="total-row-item"><span>Tax (<span id="tax-rate-display">0</span>%)</span><span class="mono" id="total-tax">$0.00</span></div>
+                <div class="total-row-item total-grand"><span>Total Due</span><span class="mono" id="total-grand">$0.00</span></div>
+            </div>
+
+            <div class="field-wrap" style="margin-top:1.25rem">
+                <label class="field-label">Notes</label>
+                <textarea id="inv-notes" class="field-ctrl" rows="3" placeholder="Payment terms, additional notes…"></textarea>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button class="ghost-btn" onclick="closeInvoiceModal()">Cancel</button>
+            <button class="solid-btn" id="btn-save-invoice" onclick="saveInvoice()">Save Invoice</button>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div id="customer-modal" class="modal-veil" style="display:none">
+    <div class="sheet">
+        <div class="sheet-header">
+            <div>
+                <p class="sheet-eyebrow">Ledgrr</p>
+                <h2 class="sheet-title" id="customer-modal-title">New Client</h2>
+            </div>
+            <button class="close-btn" onclick="closeCustomerModal()">✕</button>
+        </div>
+        <div class="sheet-body">
+            <div id="customer-form-errors" class="alert-error" style="display:none"></div>
+            <input type="hidden" id="cust-id"/>
+            <div class="field-wrap">
+                <label class="field-label">Full Name <span class="req">*</span></label>
+                <input type="text" id="cust-name" class="field-ctrl" placeholder="Alice Johnson"/>
+                <span class="field-err" id="err-cust-name"></span>
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Email <span class="req">*</span></label>
+                <input type="email" id="cust-email" class="field-ctrl mono" placeholder="alice@company.com"/>
+                <span class="field-err" id="err-cust-email"></span>
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Phone</label>
+                <input type="tel" id="cust-phone" class="field-ctrl mono" placeholder="+1 555 000 0000"/>
+            </div>
+            <div class="field-wrap">
+                <label class="field-label">Address</label>
+                <textarea id="cust-address" class="field-ctrl" rows="2" placeholder="123 Main St, City, State"></textarea>
+            </div>
+        </div>
+        <div class="sheet-footer">
+            <button class="ghost-btn" onclick="closeCustomerModal()">Cancel</button>
+            <button class="solid-btn" onclick="saveCustomer()">Save Client</button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW INVOICE MODAL -->
+<div id="view-invoice-modal" class="modal-veil" style="display:none">
+    <div class="sheet sheet-xl">
+        <div class="sheet-header">
+            <div>
+                <p class="sheet-eyebrow">Preview</p>
+                <h2 class="sheet-title mono" id="view-inv-number">—</h2>
+            </div>
+            <div style="display:flex;gap:.5rem;align-items:center">
+                <button class="ghost-btn sm" onclick="printInvoice()">🖨 Print / PDF</button>
+                <button class="close-btn" onclick="document.getElementById('view-invoice-modal').style.display='none'">✕</button>
+            </div>
+        </div>
+        <div class="sheet-body" id="view-invoice-body"></div>
+    </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" class="modal-veil" style="display:none">
+    <div class="sheet sheet-sm">
+        <div class="sheet-header">
+            <div>
+                <p class="sheet-eyebrow">Confirm Action</p>
+                <h2 class="sheet-title" id="confirm-title">Delete</h2>
+            </div>
+            <button class="close-btn" onclick="closeConfirm()">✕</button>
+        </div>
+        <div class="sheet-body">
+            <p id="confirm-message" style="color:var(--text-2);line-height:1.65;font-size:.9rem"></p>
+        </div>
+        <div class="sheet-footer">
+            <button class="ghost-btn" onclick="closeConfirm()">Cancel</button>
+            <button class="danger-btn" id="btn-confirm-ok">Confirm Delete</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMS — Employee Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700;900&display=swap"
+          rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.6.0/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="css/style.css"/>
+
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-logo">▸ EMS System</div>
+        <h1 class="login-title" id="auth-title">Welcome Back</h1>
+        <p class="login-subtitle" id="auth-subtitle">// authenticate to continue</p>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+            <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+        </div>
+
+        <!-- LOGIN PANEL -->
+        <div class="auth-panel active" id="panel-login">
+            <div id="login-error" class="alert alert-error" style="display:none"></div>
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" id="login-username" class="form-input" placeholder="admin" autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••"
+                       autocomplete="current-password">
+            </div>
+            <button class="btn btn-primary" id="login-btn" onclick="handleLogin()">
+                <span id="login-btn-text">Sign In</span>
+            </button>
+        </div>
+
+        <!-- REGISTER PANEL -->
+        <div class="auth-panel" id="panel-register">
+            <div id="reg-error" class="alert alert-error" style="display:none"></div>
+            <div id="reg-success" class="alert alert-success" style="display:none"></div>
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" id="reg-username" class="form-input" placeholder="johndoe" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="john@company.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password *</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password *</label>
+                <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select id="reg-role" class="form-select">
+                    <option value="USER">User (standard access)</option>
+                    <option value="ADMIN">Admin (full access)</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" id="reg-btn" onclick="handleRegister()">
+                <span id="reg-btn-text">Create Account</span>
+            </button>
+            <p class="login-hint">Admins can delete employees &amp; manage users</p>
+        </div>
+
+    </div>
+</div>
+
+<div id="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="header-brand-dot"></div>
+            <span class="header-brand-name">EMS</span>
+        </div>
+
+        <nav class="header-nav">
+            <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard', this)">Dashboard
+            </button>
+            <button class="nav-btn" data-page="employees" onclick="showPage('employees', this)">Employees</button>
+            <button class="nav-btn" data-page="users" onclick="showPage('users', this)" id="nav-users"
+                    style="display:none">Users
+            </button>
+        </nav>
+
+        <div class="header-right">
+            <div class="user-chip">
+                <div class="user-avatar" id="user-avatar-header">A</div>
+                <div>
+                    <div class="user-name" id="user-name-header">Admin</div>
+                    <div class="user-role" id="user-role-header">ADMIN</div>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">↳ Logout</button>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+
+        <div id="page-dashboard" class="page active">
+            <div class="page-header">
+                <div class="page-header-label">// Overview</div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="page-sub" id="dash-date"></p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card yellow">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-label">Total Employees</div>
+                    <div class="stat-value" id="stat-total">—</div>
+                    <div class="stat-change">All records in system</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon">✓</div>
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="stat-active">—</div>
+                    <div class="stat-change">Currently employed</div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">Avg. Salary</div>
+                    <div class="stat-value" id="stat-salary">—</div>
+                    <div class="stat-change">Per employee / month</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-label">Recent Hires</div>
+                    <div class="stat-value" id="stat-recent">—</div>
+                    <div class="stat-change">Last 30 days</div>
+                </div>
+            </div>
+
+            <!-- Charts & Recent -->
+            <div class="dash-grid">
+                <div class="dash-card">
+                    <div class="dash-card-title">Department Distribution</div>
+                    <div class="dept-bars" id="dept-bars">
+                        <div class="loading-overlay">
+                            <div class="spinner"></div>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+                <div class="dash-card">
+                    <div class="dash-card-title">Recent Employees</div>
+                    <div class="recent-list" id="recent-list">
+                        <div class="loading-overlay">
+                            <div class="spinner"></div>
+                            Loading...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-employees" class="page">
+            <div class="page-header">
+                <div class="page-header-label">// Records</div>
+                <h1 class="page-title">Employees</h1>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-wrapper">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" class="search-input" id="search-input"
+                           placeholder="Search by name, position, department..." oninput="debounceSearch()">
+                </div>
+                <select class="filter-select" id="filter-dept" onchange="applyFilters()">
+                    <option value="">All Departments</option>
+                </select>
+                <select class="filter-select" id="filter-status" onchange="applyFilters()">
+                    <option value="">All Statuses</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="INACTIVE">Inactive</option>
+                    <option value="ON_LEAVE">On Leave</option>
+                </select>
+                <div class="toolbar-right">
+                    <button class="btn btn-outline btn-sm" onclick="exportPDF()">⬇ Export PDF</button>
+                    <button class="btn btn-success btn-sm" onclick="openCreateModal()">+ Add Employee</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-wrapper">
+                <table class="data-table" id="employees-table">
+                    <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Position</th>
+                        <th>Department</th>
+                        <th>Hire Date</th>
+                        <th>Salary</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="table-body">
+                    <tr>
+                        <td colspan="7">
+                            <div class="loading-overlay">
+                                <div class="spinner"></div>
+                                Loading employees...
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <span class="page-info" id="page-info">Showing 0 employees</span>
+                    <div class="page-btns" id="page-btns"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-users" class="page">
+            <div class="page-header">
+                <div class="page-header-label">// Administration</div>
+                <h1 class="page-title">User Management</h1>
+                <p class="page-sub">Manage system accounts and access roles</p>
+            </div>
+
+            <div class="toolbar">
+                <div class="search-wrapper">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" class="search-input" id="user-search-input"
+                           placeholder="Search by username or email..." oninput="filterUsersTable()">
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-success btn-sm" onclick="openCreateUserModal()">+ Add User</button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table" id="users-table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                    <tr>
+                        <td colspan="6">
+                            <div class="loading-overlay">
+                                <div class="spinner"></div>
+                                Loading users...
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<div class="modal-overlay" id="emp-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modal-title">Add Employee</h2>
+            <button class="modal-close" onclick="closeModal('emp-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="modal-error" class="alert alert-error" style="display:none"></div>
+            <div class="form-grid">
+                <div class="form-group span-2">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" id="f-name" class="form-input" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Position *</label>
+                    <input type="text" id="f-position" class="form-input" placeholder="Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department *</label>
+                    <input type="text" id="f-department" class="form-input" placeholder="Engineering">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hire Date *</label>
+                    <input type="date" id="f-hireDate" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Salary (USD) *</label>
+                    <input type="number" id="f-salary" class="form-input" placeholder="75000" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="f-email" class="form-input" placeholder="john@company.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" id="f-phone" class="form-input" placeholder="+1234567890">
+                </div>
+                <div class="form-group span-2">
+                    <label class="form-label">Status</label>
+                    <select id="f-status" class="form-select">
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="ON_LEAVE">On Leave</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('emp-modal')">Cancel</button>
+            <button class="btn btn-primary" id="modal-save-btn" onclick="saveEmployee()"
+                    style="width:auto;padding:10px 24px;">
+                <span id="modal-save-text">Save Employee</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="delete-modal">
+    <div class="modal modal-delete">
+        <div class="modal-header">
+            <h2 class="modal-title" style="color:var(--red)">Delete Employee</h2>
+            <button class="modal-close" onclick="closeModal('delete-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="color:var(--text2);margin-bottom:12px;">Are you sure you want to delete <strong id="delete-name"
+                                                                                                      style="color:var(--text)"></strong>?
+            </p>
+            <p style="color:var(--text3);font-size:13px;font-family:var(--font-mono)">// This action cannot be
+                undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('delete-modal')">Cancel</button>
+            <button class="btn btn-danger" id="confirm-delete-btn" onclick="confirmDelete()">Delete Employee</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="user-modal">
+    <div class="modal" style="width:460px">
+        <div class="modal-header">
+            <h2 class="modal-title" id="user-modal-title">Add User</h2>
+            <button class="modal-close" onclick="closeModal('user-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="user-modal-error" class="alert alert-error" style="display:none"></div>
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" id="u-username" class="form-input" placeholder="johndoe">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="u-email" class="form-input" placeholder="john@company.com">
+            </div>
+            <div class="form-group" id="u-password-group">
+                <label class="form-label">Password *</label>
+                <input type="password" id="u-password" class="form-input" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group" id="u-confirm-group">
+                <label class="form-label">Confirm Password *</label>
+                <input type="password" id="u-confirm" class="form-input" placeholder="Repeat password">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select id="u-role" class="form-select">
+                    <option value="USER">User</option>
+                    <option value="ADMIN">Admin</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('user-modal')">Cancel</button>
+            <button class="btn btn-primary" id="user-modal-save-btn" onclick="saveUser()"
+                    style="width:auto;padding:10px 24px;">
+                <span id="user-modal-save-text">Create User</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="chpw-modal">
+    <div class="modal" style="width:420px;border-top-color:var(--blue)">
+        <div class="modal-header">
+            <h2 class="modal-title">Change Password</h2>
+            <button class="modal-close" onclick="closeModal('chpw-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:13px;color:var(--text3);font-family:var(--font-mono);margin-bottom:20px">
+                Changing password for: <span id="chpw-username" style="color:var(--blue)"></span>
+            </p>
+            <div id="chpw-error" class="alert alert-error" style="display:none"></div>
+            <div class="form-group">
+                <label class="form-label">New Password *</label>
+                <input type="password" id="chpw-new" class="form-input" placeholder="Min 6 characters">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password *</label>
+                <input type="password" id="chpw-confirm" class="form-input" placeholder="Repeat password">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('chpw-modal')">Cancel</button>
+            <button class="btn btn-info" id="chpw-save-btn" onclick="saveChangePassword()"
+                    style="width:auto;padding:10px 24px;">
+                <span id="chpw-save-text">Update Password</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="delete-user-modal">
+    <div class="modal modal-delete">
+        <div class="modal-header">
+            <h2 class="modal-title" style="color:var(--red)">Delete User</h2>
+            <button class="modal-close" onclick="closeModal('delete-user-modal')">✕</button>
+        </div>
+        <div class="modal-body">
+            <p style="color:var(--text2);margin-bottom:12px;">Are you sure you want to delete user <strong
+                    id="delete-user-name" style="color:var(--text)"></strong>?</p>
+            <p style="color:var(--text3);font-size:13px;font-family:var(--font-mono)">// This action cannot be
+                undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" onclick="closeModal('delete-user-modal')">Cancel</button>
+            <button class="btn btn-danger" id="confirm-delete-user-btn" onclick="confirmDeleteUser()">Delete User
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
